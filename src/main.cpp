@@ -15,11 +15,11 @@ const char *version = "SMC v1.00 interrupt";
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "10.0.0.1", 3600, 600000);
 
-// Variablen
+// Variables
 const byte pin = 4;
 long unsigned counter;
 long unsigned StartTime;
-long unsigned dailyCounter; // Zählt bisherigen Verbrauch am aktuellen Tag
+long unsigned dailyCounter; // counts increments for one day, gets reset daily
 float dailyPower;
 float tdelta;
 float Power;
@@ -136,7 +136,13 @@ void loop()
 }
 
 /*
-3V3 >> 1kOhm >> D2
-1kOhm >> Phototransistor >> GND
-Phototransistor zieht D2 auf GND
+Circuit:
+Pin 3V3 --------- R=1kOhm ---------- Pin D2
+                    |
+                    |
+                    |+      -
+            Phototransistor -------- Pin GND
+
+Function:
+Phototransistor pulls D2 to GND on increment
 */
