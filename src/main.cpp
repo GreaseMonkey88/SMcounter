@@ -1,19 +1,34 @@
+/*
+Circuit:
+Pin 3V3 -------- R=1kOhm
+                    |
+Pin D2 -------------|
+                    |
+Pin GND ------ Phototransistor
+
+Function:
+Phototransistor pulls D2 to GND on increment
+*/
+
 #include <Arduino.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
-// Update these with values suitable for your network.
+// Wifi and mqtt network settings
 const char *ssid = "the dude-net";
 const char *password = "iR3DNw8ZFk-t9e3ixVJjhAE-2d9374H9sw5-Sv99fC645C2-6G4359L463tY";
 const char *mqtt_server = "10.0.0.10";
+const char *mqtt_user = "mark";
+const char *mqtt_pass = "8749";
 const char *SensorName = "SmartMeterCounter";
-const char *version = "SMC v1.00 interrupt";
+const char *NTPserver = "10.0.0.1";
+const char *version = "SMcounter v1.00 interrupt";
 
 // NTP stuff
 WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "10.0.0.1", 3600, 600000);
+NTPClient timeClient(ntpUDP, NTPserver, 3600, 600000);
 
 // Variables
 const byte pin = 4;
@@ -31,10 +46,9 @@ PubSubClient client(espClient);
 void setup_wifi()
 {
   delay(100);
-  // We start by connecting to a WiFi network
   Serial.print("Connecting to ");
   Serial.println(ssid);
-  WiFi.hostname("ESP8266-SM");
+  WiFi.hostname("ESP8266-SM"); // Edit the hostname which will be shown in your LAN
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED)
   {
@@ -50,12 +64,11 @@ void setup_wifi()
 
 void reconnect()
 {
-  // Loop until we're reconnected
   while (!client.connected())
   {
     Serial.print("Attempting MQTT connection...");
 
-    if (client.connect(SensorName, "mark", "8749"))
+    if (client.connect(SensorName, mqtt_user, mqtt_pass))
     {
       Serial.println("connected");
     }
@@ -64,7 +77,7 @@ void reconnect()
       Serial.print("failed, rc=");
       Serial.print(client.state());
       Serial.println(" try again in 5 seconds");
-      // Wait 6 seconds before retrying
+      
       delay(6000);
     }
   }
@@ -83,7 +96,7 @@ ICACHE_RAM_ATTR void IncrementCount()
 void setup()
 {
   Serial.begin(9600);
-  Serial.println("");
+  Serial.println(" ");
   Serial.println("Starting up...");
   pinMode(pin, INPUT);
   attachInterrupt(digitalPinToInterrupt(pin), IncrementCount, FALLING);
@@ -134,15 +147,3 @@ void loop()
     delay(1000);
   }
 }
-
-/*
-Circuit:
-Pin 3V3 --------- R=1kOhm ---------- Pin D2
-                    |
-                    |
-                    |+      -
-            Phototransistor -------- Pin GND
-
-Function:
-Phototransistor pulls D2 to GND on increment
-*/
