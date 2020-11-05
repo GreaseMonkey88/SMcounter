@@ -16,7 +16,7 @@ Phototransistor pulls D2 to GND on increment from Smartmeter
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
-#define DEVmessages 1  // change 1 to 0 if you don´t want MQTT DEV messages
+#define DEVmessages 1 // change 1 to 0 if you don´t want MQTT DEV messages
 
 // Wifi and mqtt network settings
 const char *ssid = "the dude-net";
@@ -24,22 +24,29 @@ const char *password = "iR3DNw8ZFk-t9e3ixVJjhAE-2d9374H9sw5-Sv99fC645C2-6G4359L4
 const char *mqtt_server = "10.0.0.10";
 const char *mqtt_user = "mark";
 const char *mqtt_pass = "8749";
-const char *SensorName = "SmartMeterCounter";
+const char *SensorName = "SMCounterDual";
 const char *NTPserver = "10.0.0.1";
-const char *version = "SMcounter v1.00 interrupt";
+const char *version = "SMcounter v1.00 dual interrupt";
 
 // NTP stuff
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, NTPserver, 3600, 600000);
 
 // Variables
-const byte pin = 4;
-long unsigned counter;
-long unsigned StartTime;
-long unsigned dailyCounter; // counts increments for one day, gets reset daily
-float dailyPower;           // Power that has been used the present day in [kWh]
-float tdelta;
-float Power; // currently used power in [W]
+const byte pinD1 = 5;
+const byte pinD2 = 4;
+long unsigned counterA;
+long unsigned counterB;
+long unsigned StartTimeA;
+long unsigned StartTimeB;
+long unsigned dailyCounterA; // counts increments for one day, gets reset daily
+long unsigned dailyCounterB;
+float dailyPowerA;           // Power that has been used the present day in [kWh]
+float dailyPowerB;
+float tdeltaA;
+float tdeltaB;
+float PowerA; // currently used power in [W]
+float PowerB;
 float upTime;
 
 WiFiClient espClient;
@@ -50,7 +57,7 @@ void setup_wifi()
   delay(100);
   Serial.print("Connecting to ");
   Serial.println(ssid);
-  WiFi.hostname("ESP8266-SM"); // Edit the hostname which will be shown in your LAN
+  WiFi.hostname("ESP8266-SMdual"); // Edit the hostname which will be shown in your LAN
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED)
   {
@@ -85,14 +92,28 @@ void reconnect()
   }
 }
 
-ICACHE_RAM_ATTR void IncrementCount()
+ICACHE_RAM_ATTR void IncrementCountA()
 {
-  counter++;
-  if (counter == 1)
+  counterA++;
+  if (counterA == 1)
   {
-    StartTime = millis();
+    StartTimeA = millis();
   }
-  dailyCounter++;
+  dailyCounterA++;
+  Serial.print("Counter A ");
+  Serial.println(counterA);
+}
+
+ICACHE_RAM_ATTR void IncrementCountB()
+{
+  counterB++;
+  if (counterB == 1)
+  {
+    StartTimeB = millis();
+  }
+  dailyCounterB++;
+  Serial.print("Counter B ");
+  Serial.println(counterB);
 }
 
 void setup()
@@ -100,8 +121,10 @@ void setup()
   Serial.begin(9600);
   Serial.println(" ");
   Serial.println("Starting up...");
-  pinMode(pin, INPUT);
-  attachInterrupt(digitalPinToInterrupt(pin), IncrementCount, FALLING);
+  pinMode(pinD1, INPUT);
+  pinMode(pinD2, INPUT);
+  attachInterrupt(digitalPinToInterrupt(pinD1), IncrementCountA, RISING);
+  attachInterrupt(digitalPinToInterrupt(pinD2), IncrementCountB, RISING);
   setup_wifi();
   client.setServer(mqtt_server, 1885);
   timeClient.begin();
@@ -119,24 +142,49 @@ void loop()
   timeClient.update();
 
   // Calculation of current power & MQTT transmit
-  if (counter == 10)
+  if (counterA == 10)
   {
-    tdelta = millis() - StartTime;
-    Power = 1 / (tdelta / 3600000);
-    dailyPower = float(dailyCounter) / 10000;
-    counter = 0;
+    tdeltaA = millis() - StartTimeA;
+    PowerA = 1 / (tdeltaA / 3600000);
+    dailyPowerA = float(dailyCounterA) / 10000;
+    counterA = 0;
 
     upTime = (float(millis()) / (60 * 60 * 24 * 1000));
 
-    client.publish("SmartMeter/Power", String(int(Power)).c_str(), true);
-    client.publish("SmartMeter/DailyPower", String(dailyPower).c_str(), true);
-    
-    if (DEVmessages == 1)     
+    client.publish("SmartMeterDual/PowerA", String(int(PowerA)).c_str(), true);
+    Serial.println(PowerA);
+    client.publish("SmartMeterDual/DailyPowerA", String(dailyPowerA).c_str(), true);
+    Serial.println("MQTT sent A");
+
+    if (DEVmessages == 1)
     {
-      client.publish("SmartMeter/DEV_dailyCounter", String(dailyCounter).c_str(), true);
-      client.publish("SmartMeter/DEV_Wifi_RSSI", String(WiFi.RSSI()).c_str(), true);
-      client.publish("SmartMeter/DEV_Uptime", String(upTime, 3).c_str(), true);
-      client.publish("SmartMeter/DEV_Version", version, true);
+      client.publish("SmartMeterDual/DEV_dailyCounterA", String(dailyCounterA).c_str(), true);
+      client.publish("SmartMeterDual/DEV_Wifi_RSSI", String(WiFi.RSSI()).c_str(), true);
+      client.publish("SmartMeterDual/DEV_Uptime", String(upTime, 3).c_str(), true);
+      client.publish("SmartMeterDual/DEV_Version", version, true);
+    }
+  }
+
+  if (counterB == 10)
+  {
+    tdeltaB = millis() - StartTimeB;
+    PowerB = 1 / (tdeltaB / 3600000);
+    dailyPowerB = float(dailyCounterB) / 10000;
+    counterB = 0;
+
+    upTime = (float(millis()) / (60 * 60 * 24 * 1000));
+
+    client.publish("SmartMeterDual/PowerB", String(int(PowerB)).c_str(), true);
+    Serial.println(PowerB);
+    client.publish("SmartMeterDual/DailyPowerB", String(dailyPowerB).c_str(), true);
+    Serial.println("MQTT sent B");
+
+    if (DEVmessages == 1)
+    {
+      client.publish("SmartMeterDual/DEV_dailyCounterB", String(dailyCounterB).c_str(), true);
+      client.publish("SmartMeterDual/DEV_Wifi_RSSI", String(WiFi.RSSI()).c_str(), true);
+      client.publish("SmartMeterDual/DEV_Uptime", String(upTime, 3).c_str(), true);
+      client.publish("SmartMeterDual/DEV_Version", version, true);
     }
   }
 
@@ -145,11 +193,14 @@ void loop()
   {
     if (upTime >= 1)
     {
-      dailyPower = float(dailyCounter) / 10000;
-      client.publish("SmartMeter/PowerPreviousDay", String(dailyPower).c_str(), true);
+      dailyPowerA = float(dailyCounterA) / 10000;
+      dailyPowerB = float(dailyCounterB) / 10000;
+      client.publish("SmartMeterDual/PowerPreviousDayA", String(dailyPowerA).c_str(), true);
+      client.publish("SmartMeterDual/PowerPreviousDayB", String(dailyPowerB).c_str(), true);
     }
 
-    dailyCounter = 0;
+    dailyCounterA = 0;
+    dailyCounterB = 0;
     delay(1000);
   }
 }
