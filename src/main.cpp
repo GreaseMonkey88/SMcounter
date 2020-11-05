@@ -4,10 +4,10 @@ Pin 3V3 -------- R=1kOhm
                     |
 Pin D2 -------------|
                     |
-Pin GND ------ Phototransistor
+Pin GND ------ Phototransistor BPW 40
 
 Function:
-Phototransistor pulls D2 to GND on increment
+Phototransistor pulls D2 to GND on increment from Smartmeter
 */
 
 #include <Arduino.h>
@@ -15,6 +15,8 @@ Phototransistor pulls D2 to GND on increment
 #include <WiFiUdp.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
+
+#define DEVmessages 1  // change 1 to 0 if you don´t want MQTT DEV messages
 
 // Wifi and mqtt network settings
 const char *ssid = "the dude-net";
@@ -35,9 +37,9 @@ const byte pin = 4;
 long unsigned counter;
 long unsigned StartTime;
 long unsigned dailyCounter; // counts increments for one day, gets reset daily
-float dailyPower;
+float dailyPower;           // Power that has been used the present day in [kWh]
 float tdelta;
-float Power;
+float Power; // currently used power in [W]
 float upTime;
 
 WiFiClient espClient;
@@ -77,7 +79,7 @@ void reconnect()
       Serial.print("failed, rc=");
       Serial.print(client.state());
       Serial.println(" try again in 5 seconds");
-      
+
       delay(6000);
     }
   }
@@ -126,12 +128,16 @@ void loop()
 
     upTime = (float(millis()) / (60 * 60 * 24 * 1000));
 
-    client.publish("SmartMeter/Leistung", String(int(Power)).c_str(), true);
-    client.publish("SmartMeter/TagesLeistung", String(dailyPower).c_str(), true);
-    client.publish("SmartMeter/DEV_dailyCounter", String(dailyCounter).c_str(), true);
-    client.publish("SmartMeter/DEV_Wifi_RSSI", String(WiFi.RSSI()).c_str(), true);
-    client.publish("SmartMeter/DEV_Uptime", String(upTime, 3).c_str(), true);
-    client.publish("SmartMeter/DEV_Version", version, true);
+    client.publish("SmartMeter/Power", String(int(Power)).c_str(), true);
+    client.publish("SmartMeter/DailyPower", String(dailyPower).c_str(), true);
+    
+    if (DEVmessages == 1)     
+    {
+      client.publish("SmartMeter/DEV_dailyCounter", String(dailyCounter).c_str(), true);
+      client.publish("SmartMeter/DEV_Wifi_RSSI", String(WiFi.RSSI()).c_str(), true);
+      client.publish("SmartMeter/DEV_Uptime", String(upTime, 3).c_str(), true);
+      client.publish("SmartMeter/DEV_Version", version, true);
+    }
   }
 
   // Calculation of daily power usage  & MQTT transmit
@@ -140,7 +146,7 @@ void loop()
     if (upTime >= 1)
     {
       dailyPower = float(dailyCounter) / 10000;
-      client.publish("SmartMeter/LeistungVorTag", String(dailyPower).c_str(), true);
+      client.publish("SmartMeter/PowerPreviousDay", String(dailyPower).c_str(), true);
     }
 
     dailyCounter = 0;
