@@ -24,7 +24,7 @@ const char *password = "iR3DNw8ZFk-t9e3ixVJjhAE-2d9374H9sw5-Sv99fC645C2-6G4359L4
 const char *mqtt_server = "10.0.0.10";
 const char *mqtt_user = "mark";
 const char *mqtt_pass = "8749";
-const char *SensorName = "SMCounterDual";
+const char *SensorName = "SMDual";
 const char *NTPserver = "10.0.0.1";
 const char *version = "SMcounter v1.00 dual interrupt";
 
@@ -41,7 +41,7 @@ long unsigned StartTimeA;
 long unsigned StartTimeB;
 long unsigned dailyCounterA; // counts increments for one day, gets reset daily
 long unsigned dailyCounterB;
-float dailyPowerA;           // Power that has been used the present day in [kWh]
+float dailyPowerA; // Power that has been used the present day in [kWh]
 float dailyPowerB;
 float tdeltaA;
 float tdeltaB;
@@ -100,8 +100,8 @@ ICACHE_RAM_ATTR void IncrementCountA()
     StartTimeA = millis();
   }
   dailyCounterA++;
-  Serial.print("Counter A ");
-  Serial.println(counterA);
+  //Serial.print("Counter A ");
+  //Serial.println(counterA);
 }
 
 ICACHE_RAM_ATTR void IncrementCountB()
@@ -112,8 +112,8 @@ ICACHE_RAM_ATTR void IncrementCountB()
     StartTimeB = millis();
   }
   dailyCounterB++;
-  Serial.print("Counter B ");
-  Serial.println(counterB);
+  //Serial.print("Counter B ");
+  //Serial.println(counterB);
 }
 
 void setup()
@@ -151,17 +151,17 @@ void loop()
 
     upTime = (float(millis()) / (60 * 60 * 24 * 1000));
 
-    client.publish("SmartMeterDual/PowerA", String(int(PowerA)).c_str(), true);
-    Serial.println(PowerA);
-    client.publish("SmartMeterDual/DailyPowerA", String(dailyPowerA).c_str(), true);
-    Serial.println("MQTT sent A");
+    client.publish("SMdual/PowerA", String(int(PowerA)).c_str(), true);
+    //Serial.println(PowerA);
+    client.publish("SMdual/DailyPowerA", String(dailyPowerA).c_str(), true);
+    //Serial.println("MQTT sent A");
 
     if (DEVmessages == 1)
     {
-      client.publish("SmartMeterDual/DEV_dailyCounterA", String(dailyCounterA).c_str(), true);
-      client.publish("SmartMeterDual/DEV_Wifi_RSSI", String(WiFi.RSSI()).c_str(), true);
-      client.publish("SmartMeterDual/DEV_Uptime", String(upTime, 3).c_str(), true);
-      client.publish("SmartMeterDual/DEV_Version", version, true);
+      client.publish("SMdual/DEV_dailyCounterA", String(dailyCounterA).c_str(), true);
+      client.publish("SMdual/DEV_Wifi_RSSI", String(WiFi.RSSI()).c_str(), true);
+      client.publish("SMdual/DEV_Uptime", String(upTime, 3).c_str(), true);
+      client.publish("SMdual/DEV_Version", version, true);
     }
   }
 
@@ -174,17 +174,17 @@ void loop()
 
     upTime = (float(millis()) / (60 * 60 * 24 * 1000));
 
-    client.publish("SmartMeterDual/PowerB", String(int(PowerB)).c_str(), true);
-    Serial.println(PowerB);
-    client.publish("SmartMeterDual/DailyPowerB", String(dailyPowerB).c_str(), true);
-    Serial.println("MQTT sent B");
+    client.publish("SMdual/PowerB", String(int(PowerB)).c_str(), true);
+    //Serial.println(PowerB);
+    client.publish("SMdual/DailyPowerB", String(dailyPowerB).c_str(), true);
+    //Serial.println("MQTT sent B");
 
     if (DEVmessages == 1)
     {
-      client.publish("SmartMeterDual/DEV_dailyCounterB", String(dailyCounterB).c_str(), true);
-      client.publish("SmartMeterDual/DEV_Wifi_RSSI", String(WiFi.RSSI()).c_str(), true);
-      client.publish("SmartMeterDual/DEV_Uptime", String(upTime, 3).c_str(), true);
-      client.publish("SmartMeterDual/DEV_Version", version, true);
+      client.publish("SMdual/DEV_dailyCounterB", String(dailyCounterB).c_str(), true);
+      client.publish("SMdual/DEV_Wifi_RSSI", String(WiFi.RSSI()).c_str(), true);
+      client.publish("SMdual/DEV_Uptime", String(upTime, 3).c_str(), true);
+      client.publish("SMdual/DEV_Version", version, true);
     }
   }
 
@@ -195,8 +195,8 @@ void loop()
     {
       dailyPowerA = float(dailyCounterA) / 10000;
       dailyPowerB = float(dailyCounterB) / 10000;
-      client.publish("SmartMeterDual/PowerPreviousDayA", String(dailyPowerA).c_str(), true);
-      client.publish("SmartMeterDual/PowerPreviousDayB", String(dailyPowerB).c_str(), true);
+      client.publish("SMdual/PowerPreviousDayA", String(dailyPowerA).c_str(), true);
+      client.publish("SMdual/PowerPreviousDayB", String(dailyPowerB).c_str(), true);
     }
 
     dailyCounterA = 0;
