@@ -21,6 +21,7 @@ Phototransistor pulls D2 to GND on increment from Smartmeter
 // Wifi and mqtt network settings
 const char *ssid = "the dude-net";
 const char *password = "iR3DNw8ZFk-t9e3ixVJjhAE-2d9374H9sw5-Sv99fC645C2-6G4359L463tY";
+const char *HostName = "ESP8266-SMdual";   // Edit the hostname which will be shown in your LAN
 const char *mqtt_server = "10.0.0.10";
 const char *mqtt_user = "mark";
 const char *mqtt_pass = "8749";
@@ -57,7 +58,7 @@ void setup_wifi()
   delay(100);
   Serial.print("Connecting to ");
   Serial.println(ssid);
-  WiFi.hostname("ESP8266-SMdual"); // Edit the hostname which will be shown in your LAN
+  WiFi.hostname(HostName); // Edit the hostname which will be shown in your LAN
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED)
   {
@@ -123,12 +124,12 @@ void setup()
   Serial.println("Starting up...");
   pinMode(pinD1, INPUT);
   pinMode(pinD2, INPUT);
-  attachInterrupt(digitalPinToInterrupt(pinD1), IncrementCountA, RISING);
-  attachInterrupt(digitalPinToInterrupt(pinD2), IncrementCountB, RISING);
   setup_wifi();
   client.setServer(mqtt_server, 1885);
   timeClient.begin();
   Serial.println(version);
+  attachInterrupt(digitalPinToInterrupt(pinD1), IncrementCountA, RISING);
+  attachInterrupt(digitalPinToInterrupt(pinD2), IncrementCountB, RISING);
 }
 
 void loop()
