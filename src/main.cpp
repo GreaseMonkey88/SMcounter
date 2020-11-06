@@ -142,7 +142,7 @@ void loop()
   timeClient.update();
 
   // Calculation of current power & MQTT transmit
-  if (counterA == 10)
+  if (counterA >= 10)
   {
     tdeltaA = millis() - StartTimeA;
     PowerA = 1 / (tdeltaA / 3600000);
@@ -165,7 +165,7 @@ void loop()
     }
   }
 
-  if (counterB == 10)
+  if (counterB >= 10)
   {
     tdeltaB = millis() - StartTimeB;
     PowerB = 1 / (tdeltaB / 3600000);
