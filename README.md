@@ -6,4 +6,11 @@ This code works on an ESP8266, but should work with compatible chipsets.
 
 ## Circuit
 
-<img src="doc/SMcounter_circuit.png" width="250"> <img src="doc/SMcounter_circuit2.png" width="250">
+<img src="doc/SMcounter_circuit.png" width="300"> <img src="doc/SMcounter_circuit2.png" width="300">
+
+## BOM
+
+- ESP8266 or compatible, I use Wemos D1 mini
+- 2x phototransistor BPW 40
+- 1x 10k resistor, different values should work
+- 2x generic rectifiers
