@@ -14,3 +14,12 @@ This code works on an ESP8266, but should work with compatible chipsets.
 - 2x phototransistor BPW 40
 - 1x 10k resistor, different values should work
 - 2x generic rectifiers
+
+## Acknowledgements
+
+### Third party libraries
+
+- [NTPClient](https://github.com/arduino-libraries/NTPClient)
+- WiFiUdp
+- ESP8266WiFi
+- knolleary/PubSubClient
