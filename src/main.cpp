@@ -1,6 +1,6 @@
 /*
 Function:
-Phototransistor pulls selected digital pin to GND on increment from Smartmeter
+Phototransistor pulls selected digital pin to GND on increment from smartmeter. Current setup is for smartmeters which send 10.000 increments per 1 kWh.
 */
 
 #include <Arduino.h>
@@ -12,16 +12,16 @@ Phototransistor pulls selected digital pin to GND on increment from Smartmeter
 #define DEVmessages 1 // change 1 to 0 if you don´t want MQTT DEV messages
 
 // Wifi and mqtt network settings
-const char *ssid = "the dude-net";
-const char *password = "iR3DNw8ZFk-t9e3ixVJjhAE-2d9374H9sw5-Sv99fC645C2-6G4359L463tY";
-const char *HostName = "ESP8266-SMdual";
-const char *mqtt_server = "10.0.0.10";
-const char *mqtt_user = "mark";
-const char *mqtt_pass = "8749";
-const unsigned int port = 1885;    // regular port is 1883
-const char *SensorName = "SMDual"; // will be the name in yout mqtt broker
-const char *NTPserver = "10.0.0.1";
-const char *version = "SMcounter v1.00 dual interrupt";
+const char *ssid = "........";               //
+const char *password = "........";           //
+const char *HostName = "ESP8266-SMdual";     //
+const char *mqtt_server = "10.0.0.88";       // ip address or hostname of your mqtt broker
+const char *mqtt_user = "........";          //
+const char *mqtt_pass = "........";          //
+const unsigned int port = 1883;              // regular port is 1883
+const char *SensorName = "SMDual";           // will be the name in yout mqtt broker
+const char *NTPserver = "0.de.pool.ntp.org"; // use one close to you, sometimes your router acts as one
+const char *version = "SMcounter v1.00";     //
 
 // NTP stuff
 WiFiUDP ntpUDP;
