@@ -1,13 +1,6 @@
 /*
-Circuit:
-Pin 3V3 -------- R=1kOhm
-                    |
-Pin D2 -------------|
-                    |
-Pin GND ------ Phototransistor BPW 40
-
 Function:
-Phototransistor pulls D2 to GND on increment from Smartmeter
+Phototransistor pulls selected digital pin to GND on increment from Smartmeter
 */
 
 #include <Arduino.h>
@@ -21,11 +14,12 @@ Phototransistor pulls D2 to GND on increment from Smartmeter
 // Wifi and mqtt network settings
 const char *ssid = "the dude-net";
 const char *password = "iR3DNw8ZFk-t9e3ixVJjhAE-2d9374H9sw5-Sv99fC645C2-6G4359L463tY";
-const char *HostName = "ESP8266-SMdual";   // Edit the hostname which will be shown in your LAN
+const char *HostName = "ESP8266-SMdual";
 const char *mqtt_server = "10.0.0.10";
 const char *mqtt_user = "mark";
 const char *mqtt_pass = "8749";
-const char *SensorName = "SMDual";
+const unsigned int port = 1885;    // regular port is 1883
+const char *SensorName = "SMDual"; // will be the name in yout mqtt broker
 const char *NTPserver = "10.0.0.1";
 const char *version = "SMcounter v1.00 dual interrupt";
 
@@ -34,21 +28,21 @@ WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, NTPserver, 3600, 600000);
 
 // Variables
-const byte pinD1 = 5;
-const byte pinD2 = 4;
-long unsigned counterA;
-long unsigned counterB;
-long unsigned StartTimeA;
-long unsigned StartTimeB;
+const byte pinD1 = 5;        // digital pins the phototransistors are connected to
+const byte pinD2 = 4;        //
+long unsigned counterA;      //
+long unsigned counterB;      //
+long unsigned StartTimeA;    //
+long unsigned StartTimeB;    //
 long unsigned dailyCounterA; // counts increments for one day, gets reset daily
-long unsigned dailyCounterB;
-float dailyPowerA; // Power that has been used the present day in [kWh]
-float dailyPowerB;
-float tdeltaA;
-float tdeltaB;
-float PowerA; // currently used power in [W]
-float PowerB;
-float upTime;
+long unsigned dailyCounterB; //
+float dailyPowerA;           // Power that has been used the present day in [kWh]
+float dailyPowerB;           //
+float tdeltaA;               //
+float tdeltaB;               //
+float PowerA;                // currently used power in [W]
+float PowerB;                //
+float upTime;                //
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -58,29 +52,28 @@ void setup_wifi()
   delay(100);
   Serial.print("Connecting to ");
   Serial.println(ssid);
-  WiFi.hostname(HostName); // Edit the hostname which will be shown in your LAN
+  WiFi.hostname(HostName);
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);
     Serial.print(".");
   }
-  randomSeed(micros());
   Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
+  Serial.print("WiFi connected!");
+  Serial.print("IP address: ");
+  Serial.print(WiFi.localIP());
 }
 
 void reconnect()
 {
   while (!client.connected())
   {
-    Serial.print("Attempting MQTT connection...");
+    Serial.println("Attempting MQTT connection... ");
 
     if (client.connect(SensorName, mqtt_user, mqtt_pass))
     {
-      Serial.println("connected");
+      Serial.print("connected");
     }
     else
     {
@@ -101,8 +94,6 @@ ICACHE_RAM_ATTR void IncrementCountA()
     StartTimeA = millis();
   }
   dailyCounterA++;
-  //Serial.print("Counter A ");
-  //Serial.println(counterA);
 }
 
 ICACHE_RAM_ATTR void IncrementCountB()
@@ -113,8 +104,6 @@ ICACHE_RAM_ATTR void IncrementCountB()
     StartTimeB = millis();
   }
   dailyCounterB++;
-  //Serial.print("Counter B ");
-  //Serial.println(counterB);
 }
 
 void setup()
@@ -125,7 +114,7 @@ void setup()
   pinMode(pinD1, INPUT);
   pinMode(pinD2, INPUT);
   setup_wifi();
-  client.setServer(mqtt_server, 1885);
+  client.setServer(mqtt_server, port); // regular port is 1883
   timeClient.begin();
   Serial.println(version);
   attachInterrupt(digitalPinToInterrupt(pinD1), IncrementCountA, RISING);
@@ -153,15 +142,13 @@ void loop()
     upTime = (float(millis()) / (60 * 60 * 24 * 1000));
 
     client.publish("SMdual/PowerA", String(int(PowerA)).c_str(), true);
-    //Serial.println(PowerA);
     client.publish("SMdual/DailyPowerA", String(dailyPowerA).c_str(), true);
-    //Serial.println("MQTT sent A");
 
     if (DEVmessages == 1)
     {
       client.publish("SMdual/DEV_dailyCounterA", String(dailyCounterA).c_str(), true);
       client.publish("SMdual/DEV_Wifi_RSSI", String(WiFi.RSSI()).c_str(), true);
-      client.publish("SMdual/DEV_Uptime", String(upTime, 3).c_str(), true);
+      client.publish("SMdual/DEV_Uptime", String(upTime, 2).c_str(), true);
       client.publish("SMdual/DEV_Version", version, true);
     }
   }
@@ -176,15 +163,13 @@ void loop()
     upTime = (float(millis()) / (60 * 60 * 24 * 1000));
 
     client.publish("SMdual/PowerB", String(int(PowerB)).c_str(), true);
-    //Serial.println(PowerB);
     client.publish("SMdual/DailyPowerB", String(dailyPowerB).c_str(), true);
-    //Serial.println("MQTT sent B");
 
     if (DEVmessages == 1)
     {
       client.publish("SMdual/DEV_dailyCounterB", String(dailyCounterB).c_str(), true);
       client.publish("SMdual/DEV_Wifi_RSSI", String(WiFi.RSSI()).c_str(), true);
-      client.publish("SMdual/DEV_Uptime", String(upTime, 3).c_str(), true);
+      client.publish("SMdual/DEV_Uptime", String(upTime, 2).c_str(), true);
       client.publish("SMdual/DEV_Version", version, true);
     }
   }
