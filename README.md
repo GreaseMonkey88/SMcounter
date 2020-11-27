@@ -5,6 +5,6 @@ This is a sensor to measure your current power usage if you have a smartmeter in
 This code works on an ESP8266, but should work with compatible chipsets.
 
 ## Circuit
-![](doc/SMcounter_circuit.png)
+![](doc/SMcounter_circuit.png | width=250)
 
-![](doc/SMcounter_circuit2.png)
+![](doc/SMcounter_circuit2.png | width=250)
