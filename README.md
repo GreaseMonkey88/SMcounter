@@ -6,6 +6,6 @@ This code works on an ESP8266, but should work with compatible chipsets.
 
 ## Circuit
 
-❮img src="doc/SMcounter_circuit.png" width="250" ❯
+<img src="doc/SMcounter_circuit.png" width="250">
 
-❮img src="doc/SMcounter_circuit2.png" width="250" ❯
+<img src="doc/SMcounter_circuit2.png" width="250">
