@@ -10,7 +10,7 @@ This code works on an ESP8266, but should work with compatible chipsets.
 
 ## BOM
 
-- ESP8266 or compatible, I use Wemos D1 mini
+- ESP8266 or compatible, I use a Wemos D1 mini
 - 2x phototransistor BPW 40
 - 1x 10k resistor, different values should work
 - 2x generic rectifiers
