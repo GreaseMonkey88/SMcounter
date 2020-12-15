@@ -12,7 +12,7 @@ This code works on an ESP8266, but should work with compatible chipsets.
 
 - ESP8266 or compatible, I use a Wemos D1 mini
 - 2x phototransistor BPW 40
-- 1x 10k resistor, different values should work
+- 1x 1k or 10k resistor, different values should work
 - 2x generic rectifiers
 
 ## Acknowledgements
