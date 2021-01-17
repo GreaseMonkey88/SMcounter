@@ -2,7 +2,9 @@
 
 This is a sensor setup measures your current power usage, if you have a smartmeter installed. It uses the IR output of the smartmeter, which in most cases outputs 10.000 blinks per kWh. It does not read the SML output for which you would need a pin code to activate in your smartmeter.
 
-This code works on an ESP8266, but should work with compatible chipsets. 
+This code works on an ESP8266, but should work with compatible chipsets.
+
+If you experience jumps and small runaways in the measurements you should try different digital pins. Good pins to use are D1, D2, D5, D6, D7 and maybe more, but your milage my vary.
 
 ## Circuit
 
